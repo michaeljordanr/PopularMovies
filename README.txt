@@ -1,0 +1,1 @@
+Please insert a The Movie DB API KEY in string.xml
