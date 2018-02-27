@@ -1,1 +1,1 @@
-Please insert a The Movie DB API KEY in string.xml
+Please insert a The Movie DB API KEY in com.jordan.android.popularmovies.utilities.NetworkUtils.java

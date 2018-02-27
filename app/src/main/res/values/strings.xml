@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">PopularMovies</string>
 
-    <string name="themoviedb_api_key">API_KEY_HERE</string>
-
     <string name="popular">Most Popular</string>
     <string name="top_rated">Top Rated</string>
     <string name="ratings">Ratings:</string>
@@ -14,4 +12,7 @@
     <string name="lorem_ipsum">Lorem Ipsum is simply dummy text of the printing and typesetting industry.
         Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,
         when an unknown printer took a galley of type and scrambled it to make a type specimen book.</string>
+    <string name="error_internet">Internet not available. Check your internet connectivity and try again</string>
+    <string name="info">Info</string>
+    <string name="ok">OK</string>
 </resources>

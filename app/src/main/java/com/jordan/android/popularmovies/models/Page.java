@@ -1,16 +1,18 @@
 package com.jordan.android.popularmovies.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by Michael on 25/02/2018.
  */
 
-public class Page implements Serializable {
+public class Page implements Parcelable {
 
     @SerializedName("page")
     @Expose
@@ -27,6 +29,15 @@ public class Page implements Serializable {
     @SerializedName("results")
     @Expose
     private List<Movie> results;
+
+    public Page(){}
+
+    public Page(Parcel input){
+        page = input.readInt();
+        totalResults = input.readInt();
+        totalPages = input.readInt();
+        results = input.readArrayList(List.class.getClassLoader());
+    }
 
     public int getPage() {
         return page;
@@ -59,4 +70,30 @@ public class Page implements Serializable {
     public void setResults(List<Movie> results) {
         this.results = results;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(page);
+        parcel.writeInt(totalResults);
+        parcel.writeInt(totalPages);
+        parcel.writeList(results);
+    }
+
+    public static final Parcelable.Creator<Page> CREATOR =
+            new Parcelable.Creator<Page>(){
+                @Override
+                public Page createFromParcel(Parcel parcel) {
+                    return new Page(parcel);
+                }
+
+                @Override
+                public Page[] newArray(int size) {
+                    return new Page[size];
+                }
+            };
 }

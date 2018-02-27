@@ -17,7 +17,11 @@ import com.jordan.android.popularmovies.models.Movie;
 import com.jordan.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
+import java.net.SocketTimeoutException;
 import java.net.URL;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by Michael on 25/02/2018.
@@ -25,13 +29,20 @@ import java.net.URL;
 
 public class DetailActivity extends AppCompatActivity {
 
-    private TextView mTitleTextView;
-    private ImageView mPosterImageView;
-    private TextView mRatingsTextView;
-    private TextView mReleaseDateTextView;
-    private TextView mPlotTextView;
-    private ProgressBar mLoadingProgress;
-    private LinearLayout mDetailLayout;
+    @BindView(R.id.tv_movie_detail_title)
+    TextView mTitleTextView;
+    @BindView(R.id.iv_movie_poster_detail)
+    ImageView mPosterImageView;
+    @BindView(R.id.tv_ratings)
+    TextView mRatingsTextView;
+    @BindView(R.id.tv_release_date)
+    TextView mReleaseDateTextView;
+    @BindView(R.id.tv_movie_plot)
+    TextView mPlotTextView;
+    @BindView(R.id.pb_loading_indicator_detail)
+    ProgressBar mLoadingProgress;
+    @BindView(R.id.ll_detail)
+    LinearLayout mDetailLayout;
 
     private Movie mMovie = new Movie();
 
@@ -39,14 +50,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-
-        mTitleTextView= findViewById(R.id.tv_movie_detail_title);
-        mPosterImageView = findViewById(R.id.iv_movie_poster_detail);
-        mRatingsTextView = findViewById(R.id.tv_ratings);
-        mReleaseDateTextView = findViewById(R.id.tv_release_date);
-        mPlotTextView = findViewById(R.id.tv_movie_plot);
-        mLoadingProgress = findViewById(R.id.pb_loading_indicator_detail);
-        mDetailLayout = findViewById(R.id.ll_detail);
+        ButterKnife.bind(this);
 
         Intent intentThatShareThisActivity = getIntent();
 
@@ -72,6 +76,7 @@ public class DetailActivity extends AppCompatActivity {
     public class MovieTask extends AsyncTask<String, Void, Movie> {
 
         final Context mContext;
+        boolean isNetworkAvailable = true;
 
         MovieTask(Context context) {
             mContext = context;
@@ -89,15 +94,14 @@ public class DetailActivity extends AppCompatActivity {
             try {
                 String strMovieId = movieId[0];
 
-                URL moviesRequestUrl = NetworkUtils.buildUrlMovie(mContext, strMovieId);
-
-                String jsonResponse = NetworkUtils
-                        .getResponseFromHttpUrl(moviesRequestUrl);
-
+                URL moviesRequestUrl = NetworkUtils.buildUrlMovie(strMovieId);
+                String jsonResponse = NetworkUtils.run(moviesRequestUrl);
                 mMovie = new Gson().fromJson(jsonResponse, mMovie.getClass());
 
                 return mMovie;
-
+            } catch (SocketTimeoutException e){
+                isNetworkAvailable = false;
+                return null;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -107,9 +111,13 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Movie movie) {
             super.onPostExecute(movie);
-            mDetailLayout.setVisibility(View.VISIBLE);
+            if(isNetworkAvailable) {
+                mDetailLayout.setVisibility(View.VISIBLE);
+                fillMovieDetail(movie);
+            }else{
+                NetworkUtils.showDialogErrorNetwork(mContext);
+            }
             mLoadingProgress.setVisibility(View.INVISIBLE);
-            fillMovieDetail(movie);
         }
     }
 

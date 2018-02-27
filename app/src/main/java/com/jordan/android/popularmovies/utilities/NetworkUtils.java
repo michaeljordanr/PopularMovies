@@ -1,22 +1,28 @@
 package com.jordan.android.popularmovies.utilities;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 
 import com.jordan.android.popularmovies.R;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Scanner;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by Michael on 25/02/2018.
  */
 
 public final class NetworkUtils {
+    private static final String THEMOVIEDB_API_KEY = "API_KEY_HERE";
     private static final String POPULAR_MOVIES_URL =
             "https://api.themoviedb.org/3/movie/popular";
     private static final String TOP_RATED__MOVIES_URL =
@@ -34,9 +40,11 @@ public final class NetworkUtils {
     private final static String PAGE_PARAM = "page";
     private final static String IMG_SIZE_PARAM = "w185";
 
-    public static URL buildUrlPopular(Context context, int page) {
+    private static OkHttpClient client = new OkHttpClient();
+
+    public static URL buildUrlPopular(int page) {
         Uri builtUri = Uri.parse(POPULAR_MOVIES_URL).buildUpon()
-                .appendQueryParameter(API_KEY_PARAM, context.getString(R.string.themoviedb_api_key))
+                .appendQueryParameter(API_KEY_PARAM, THEMOVIEDB_API_KEY)
                 .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                 .appendQueryParameter(PAGE_PARAM, String.valueOf(page))
                 .build();
@@ -51,9 +59,9 @@ public final class NetworkUtils {
         return url;
     }
 
-    public static URL buildUrlTopRated(Context context, int page) {
+    public static URL buildUrlTopRated(int page) {
         Uri builtUri = Uri.parse(TOP_RATED__MOVIES_URL).buildUpon()
-                .appendQueryParameter(API_KEY_PARAM, context.getString(R.string.themoviedb_api_key))
+                .appendQueryParameter(API_KEY_PARAM, THEMOVIEDB_API_KEY)
                 .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                 .appendQueryParameter(PAGE_PARAM, String.valueOf(page))
                 .build();
@@ -68,9 +76,9 @@ public final class NetworkUtils {
         return url;
     }
 
-    public static URL buildUrlMovie(Context context, String movieId) {
+    public static URL buildUrlMovie(String movieId) {
         Uri builtUri = Uri.parse(MOVIE_URL + movieId).buildUpon()
-                .appendQueryParameter(API_KEY_PARAM, context.getString(R.string.themoviedb_api_key))
+                .appendQueryParameter(API_KEY_PARAM, THEMOVIEDB_API_KEY)
                 .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                 .build();
 
@@ -98,22 +106,39 @@ public final class NetworkUtils {
         return url;
     }
 
-    public static String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
+    public static String run(URL url) throws IOException {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
 
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
+        Response response = client.newCall(request).execute();
+        return response.body().string();
+    }
 
-            boolean hasInput = scanner.hasNext();
-            if (hasInput) {
-                return scanner.next();
-            } else {
-                return null;
-            }
-        } finally {
-            urlConnection.disconnect();
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
+
+        boolean isAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+
+        if(!isAvailable) {
+            showDialogErrorNetwork(context);
         }
+
+        return isAvailable;
+    }
+
+    public static void showDialogErrorNetwork(Context context){
+        AlertDialog.Builder builder;
+        builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
+        builder.setTitle(R.string.info)
+                .setMessage(R.string.error_internet)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 }

@@ -1,15 +1,16 @@
 package com.jordan.android.popularmovies.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
-import java.io.Serializable;
 
 /**
  * Created by Michael on 25/02/2018.
  */
 
-public class Movie implements Serializable {
+public class Movie implements Parcelable {
 
     @SerializedName("id")
     @Expose
@@ -38,6 +39,18 @@ public class Movie implements Serializable {
     @SerializedName("release_date")
     @Expose
     private String releaseDate;
+
+    public Movie(){}
+
+    public Movie(Parcel input){
+        id = input.readInt();
+        title = input.readString();
+        imagePath = input.readString();
+        ratings = input.readFloat();
+        originalTitle = input.readString();
+        plot = input.readString();
+        releaseDate = input.readString();
+    }
 
     public String getOriginalTitle() {
         return originalTitle;
@@ -94,4 +107,35 @@ public class Movie implements Serializable {
     public void setRating(float voteAverage) {
         this.ratings = voteAverage;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(id);
+        parcel.writeString(title);
+        parcel.writeString(imagePath);
+        parcel.writeFloat(ratings);
+        parcel.writeString(originalTitle);
+        parcel.writeString(plot);
+        parcel.writeString(releaseDate);
+    }
+
+    public static final Parcelable.Creator<Movie> CREATOR =
+            new Parcelable.Creator<Movie>(){
+                @Override
+                public Movie createFromParcel(Parcel parcel) {
+                    return new Movie(parcel);
+                }
+
+                @Override
+                public Movie[] newArray(int size) {
+                    return new Movie[size];
+                }
+            };
+
+
 }
