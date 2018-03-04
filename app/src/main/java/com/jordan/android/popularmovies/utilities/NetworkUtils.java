@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 
+import com.jordan.android.popularmovies.BuildConfig;
 import com.jordan.android.popularmovies.R;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ import okhttp3.Response;
  */
 
 public final class NetworkUtils {
-    private static final String THEMOVIEDB_API_KEY = "API_KEY_HERE";
+    private static final String THEMOVIEDB_API_KEY = "7b6b5dbb7725da9d89a79a75d7df097e";
     private static final String POPULAR_MOVIES_URL =
             "https://api.themoviedb.org/3/movie/popular";
     private static final String TOP_RATED__MOVIES_URL =
@@ -35,7 +36,7 @@ public final class NetworkUtils {
     private static final String LANGUAGE = "en-US";
 
 
-    private final static String API_KEY_PARAM = "api_key";
+    private final static String API_KEY_PARAM = BuildConfig.API_KEY;
     private final static String LANGUAGE_PARAM = "language";
     private final static String PAGE_PARAM = "page";
     private final static String IMG_SIZE_PARAM = "w185";

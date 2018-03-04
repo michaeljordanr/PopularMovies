@@ -1,8 +1,7 @@
-package com.jordan.android.popularmovies;
+package com.jordan.android.popularmovies.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,21 +12,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.google.gson.Gson;
+import com.jordan.android.popularmovies.R;
 import com.jordan.android.popularmovies.adapters.PopularMoviesAdapter;
+import com.jordan.android.popularmovies.interfaces.AsyncTaskCompleteListener;
 import com.jordan.android.popularmovies.models.Movie;
-import com.jordan.android.popularmovies.models.Page;
+import com.jordan.android.popularmovies.tasks.PopularMoviesTask;
 import com.jordan.android.popularmovies.utilities.Filter;
 import com.jordan.android.popularmovies.utilities.NetworkUtils;
 
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements PopularMoviesAdapter.PopularMoviesAdapterOnClickListener{
+public class MainActivity extends AppCompatActivity implements
+        PopularMoviesAdapter.PopularMoviesAdapterOnClickListener, AsyncTaskCompleteListener<List<Movie>>{
 
     private static final String FILTER_KEY = "filter";
     private PopularMoviesAdapter mPopularMoviesAdapter;
@@ -36,9 +35,6 @@ public class MainActivity extends AppCompatActivity implements PopularMoviesAdap
     RecyclerView mRecyclerView;
     @BindView(R.id.pb_loading_indicator)
     ProgressBar mLoadingIndicator;
-
-    private Page resultPage = new Page();
-
 
     private Filter filterSelected = Filter.POPULAR;
 
@@ -71,63 +67,9 @@ public class MainActivity extends AppCompatActivity implements PopularMoviesAdap
     }
 
     private void loadPopularMovies(Filter filter){
-        new PopularMoviesTask(this).execute(filter);
-    }
-
-    public class PopularMoviesTask extends AsyncTask<Filter, Void, List<Movie>> {
-
-        final Context mContext;
-        boolean isNetworkAvailable = true;
-
-        public PopularMoviesTask(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.INVISIBLE);
-        }
-
-        @Override
-        protected List<Movie> doInBackground(Filter... filter) {
-            try {
-                Filter filterSelected = filter[0];
-
-                URL moviesRequestUrl = null;
-                if (filterSelected == Filter.POPULAR) {
-                    moviesRequestUrl = NetworkUtils.buildUrlPopular(1);
-                } else if (filterSelected == Filter.TOP_RATED) {
-                    moviesRequestUrl = NetworkUtils.buildUrlTopRated(1);
-                }
-
-                String jsonResponse = NetworkUtils.run(moviesRequestUrl);
-
-                resultPage = new Gson().fromJson(jsonResponse, resultPage.getClass());
-
-                return resultPage.getResults();
-            } catch (UnknownHostException e){
-                isNetworkAvailable = false;
-                return null;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> movies) {
-            if(isNetworkAvailable) {
-                mRecyclerView.setVisibility(View.VISIBLE);
-                if (movies != null) {
-                    mPopularMoviesAdapter.setMovieData(movies);
-                }
-            }else{
-                NetworkUtils.showDialogErrorNetwork(mContext);
-            }
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-        }
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        new PopularMoviesTask(this, this).execute(filter);
     }
 
     @Override
@@ -166,5 +108,18 @@ public class MainActivity extends AppCompatActivity implements PopularMoviesAdap
          }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onTaskComplete(List<Movie> movies, boolean isNetworkAvailable) {
+        if(isNetworkAvailable) {
+            mRecyclerView.setVisibility(View.VISIBLE);
+            if (movies != null) {
+                mPopularMoviesAdapter.setMovieData(movies);
+            }
+        }else{
+            NetworkUtils.showDialogErrorNetwork(this);
+        }
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
     }
 }
