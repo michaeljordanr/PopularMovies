@@ -9,6 +9,7 @@ import android.widget.ImageView;
 
 import com.jordan.android.popularmovies.R;
 import com.jordan.android.popularmovies.models.Movie;
+import com.jordan.android.popularmovies.utilities.Constants;
 import com.jordan.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -46,7 +47,7 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
         Movie movie = mPopularMovies.get(position);
 
         Picasso.with(holder.mMoviePoster.getContext()).load(NetworkUtils.buildUrlImg(
-                movie.getImagePath()).toString()).into(holder.mMoviePoster);
+                movie.getImagePath(), Constants.IMG_SIZE_PARAM).toString()).into(holder.mMoviePoster);
     }
 
     @Override
@@ -61,12 +62,12 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
     }
 
     public class PopularMoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        public final ImageView mMoviePoster;
+        ImageView mMoviePoster;
 
-        public PopularMoviesViewHolder(View view){
-            super(view);
-            mMoviePoster = view.findViewById(R.id.iv_movie_poster);
-            view.setOnClickListener(this);
+        public PopularMoviesViewHolder(View itemView){
+            super(itemView);
+            mMoviePoster = itemView.findViewById(R.id.iv_movie_poster);
+            itemView.setOnClickListener(this);
         }
 
         @Override

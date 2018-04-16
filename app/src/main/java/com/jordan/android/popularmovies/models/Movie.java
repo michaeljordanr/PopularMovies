@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by Michael on 25/02/2018.
  */
@@ -40,6 +42,14 @@ public class Movie implements Parcelable {
     @Expose
     private String releaseDate;
 
+    @SerializedName("backdrop_path")
+    @Expose
+    private String backdropPathImg;
+
+    private List<String> videos;
+
+    private List<Review> reviews;
+
     public Movie(){}
 
     public Movie(Parcel input){
@@ -50,6 +60,8 @@ public class Movie implements Parcelable {
         originalTitle = input.readString();
         plot = input.readString();
         releaseDate = input.readString();
+        backdropPathImg = input.readString();
+        reviews = input.readArrayList(List.class.getClassLoader());
     }
 
     public String getOriginalTitle() {
@@ -108,6 +120,28 @@ public class Movie implements Parcelable {
         this.ratings = voteAverage;
     }
 
+    public String getBackdropPathImg() { return backdropPathImg; }
+
+    public void setBackdropPathImg(String backdropPathImg) {
+        this.backdropPathImg = backdropPathImg;
+    }
+
+    public List<String> getVideos() {
+        return videos;
+    }
+
+    public void setVideos(List<String> videos) {
+        this.videos = videos;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -122,6 +156,8 @@ public class Movie implements Parcelable {
         parcel.writeString(originalTitle);
         parcel.writeString(plot);
         parcel.writeString(releaseDate);
+        parcel.writeString(backdropPathImg);
+        parcel.writeList(reviews);
     }
 
     public static final Parcelable.Creator<Movie> CREATOR =

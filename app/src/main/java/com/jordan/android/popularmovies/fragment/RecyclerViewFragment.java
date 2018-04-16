@@ -19,7 +19,7 @@ import com.jordan.android.popularmovies.interfaces.AsyncTaskCompleteListener;
 import com.jordan.android.popularmovies.models.Movie;
 import com.jordan.android.popularmovies.tasks.PopularMoviesTask;
 import com.jordan.android.popularmovies.utilities.Filter;
-import com.jordan.android.popularmovies.utilities.Keys;
+import com.jordan.android.popularmovies.utilities.Constants;
 import com.jordan.android.popularmovies.utilities.NetworkUtils;
 
 import java.util.List;
@@ -58,7 +58,7 @@ public class RecyclerViewFragment extends Fragment implements
         mRecyclerView.setAdapter(mPopularMoviesAdapter);
 
         Bundle args = getArguments();
-        filterSelected = Filter.fromValue(args.getInt(Keys.FILTER_KEY));
+        filterSelected = Filter.fromValue(args.getInt(Constants.FILTER_KEY));
 
         loadPopularMovies(filterSelected);
 
@@ -77,8 +77,9 @@ public class RecyclerViewFragment extends Fragment implements
         if(NetworkUtils.isNetworkAvailable(context)) {
             Class destinationClass = DetailActivity.class;
             Intent intentToStartDetailActivity = new Intent(context, destinationClass);
-            intentToStartDetailActivity.putExtra(Keys.ID_MOVIE, idMovie);
-            startActivity(intentToStartDetailActivity);
+            intentToStartDetailActivity.putExtra(Constants.ID_MOVIE, idMovie);
+            intentToStartDetailActivity.putExtra(Constants.FILTER_KEY, filterSelected.getValue());
+            getActivity().startActivityForResult(intentToStartDetailActivity, 1);
         }
     }
 
@@ -99,5 +100,10 @@ public class RecyclerViewFragment extends Fragment implements
         mLoadingIndicator.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.INVISIBLE);
         new PopularMoviesTask(getActivity(), this).execute(filter);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

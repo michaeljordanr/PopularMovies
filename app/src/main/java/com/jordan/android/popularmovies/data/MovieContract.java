@@ -17,5 +17,10 @@ public class MovieContract {
         public static final String TABLE_NAME = "favorite";
         public static final String COLUMN_MOVIE_ID = "movieId";
         public static final String COLUMN_TITLE = "title";
+        public static final String COLUMN_POSTER = "poster";
+
+        public static final int INDEX_MOVIE_ID = 1;
+        public static final int INDEX_TITLE = 2;
+        public static final int INDEX_POSTER = 3;
     }
 }

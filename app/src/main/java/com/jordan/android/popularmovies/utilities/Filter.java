@@ -5,7 +5,7 @@ package com.jordan.android.popularmovies.utilities;
  */
 
 public enum Filter {
-    POPULAR(1), TOP_RATED(2);
+    POPULAR(1), TOP_RATED(2), FAVORITES(3);
 
     private int value;
 

@@ -35,11 +35,9 @@ public final class NetworkUtils {
 
     private static final String LANGUAGE = "en-US";
 
-
     private final static String API_KEY_PARAM = "api_key";
     private final static String LANGUAGE_PARAM = "language";
     private final static String PAGE_PARAM = "page";
-    private final static String IMG_SIZE_PARAM = "w185";
 
     private static OkHttpClient client = new OkHttpClient();
 
@@ -77,7 +75,7 @@ public final class NetworkUtils {
         return url;
     }
 
-    public static URL buildUrlMovieVideos(String movieId) {
+    public static URL buildUrlMovieTrailers(String movieId) {
         Uri builtUri = Uri.parse(MOVIE_URL + movieId + "/videos").buildUpon()
                 .appendQueryParameter(API_KEY_PARAM, THEMOVIEDB_API_KEY)
                 .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
@@ -125,8 +123,8 @@ public final class NetworkUtils {
         return url;
     }
 
-    public static URL buildUrlImg(String img) {
-        Uri builtUri = Uri.parse(IMG_URL + "/" + IMG_SIZE_PARAM + "/" + img).buildUpon()
+    public static URL buildUrlImg(String img, String size) {
+        Uri builtUri = Uri.parse(IMG_URL + "/" + size + "/" + img).buildUpon()
                 .build();
 
         URL url = null;

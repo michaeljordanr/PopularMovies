@@ -9,7 +9,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import com.jordan.android.popularmovies.R;
 import com.jordan.android.popularmovies.fragment.RecyclerViewFragment;
 import com.jordan.android.popularmovies.utilities.Filter;
-import com.jordan.android.popularmovies.utilities.Keys;
+import com.jordan.android.popularmovies.utilities.Constants;
 
 public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
 
@@ -25,10 +25,18 @@ public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
         Fragment frag = new RecyclerViewFragment();
         Bundle args = new Bundle();
 
-        if (position == 0) {
-            args.putInt(Keys.FILTER_KEY, Filter.POPULAR.getValue());
-        } else if (position == 1){
-            args.putInt(Keys.FILTER_KEY, Filter.TOP_RATED.getValue());
+        switch (position) {
+            case 0:
+                args.putInt(Constants.FILTER_KEY, Filter.POPULAR.getValue());
+                break;
+            case 1:
+                args.putInt(Constants.FILTER_KEY, Filter.TOP_RATED.getValue());
+                break;
+            case 2:
+                args.putInt(Constants.FILTER_KEY, Filter.FAVORITES.getValue());
+                break;
+            default:
+                return null;
         }
 
         frag.setArguments(args);
@@ -38,7 +46,7 @@ public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -48,6 +56,8 @@ public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
                 return mContext.getString(R.string.popular);
             case 1:
                 return mContext.getString(R.string.top_rated);
+            case 2:
+                return mContext.getString(R.string.favorites);
             default:
                 return null;
         }
