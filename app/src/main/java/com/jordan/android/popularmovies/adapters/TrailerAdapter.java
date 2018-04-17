@@ -18,8 +18,8 @@ import java.util.List;
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerViewHolder> {
     private List<String> mTrailerArr;
 
-    private TrailerAdapterOnClickListener mClickListerner;
-    private Context mContext;
+    private final TrailerAdapterOnClickListener mClickListerner;
+    private final Context mContext;
 
     public interface TrailerAdapterOnClickListener{
         void onClickTrailer(String url);

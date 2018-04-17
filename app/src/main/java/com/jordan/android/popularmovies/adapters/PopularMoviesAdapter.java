@@ -46,8 +46,10 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
     public void onBindViewHolder(PopularMoviesViewHolder holder, int position) {
         Movie movie = mPopularMovies.get(position);
 
-        Picasso.with(holder.mMoviePoster.getContext()).load(NetworkUtils.buildUrlImg(
-                movie.getImagePath(), Constants.IMG_SIZE_PARAM).toString()).into(holder.mMoviePoster);
+        Picasso.with(holder.mMoviePoster.getContext())
+                .load(NetworkUtils.buildUrlImg(movie.getImagePath(),
+                        Constants.IMG_SIZE_PARAM).toString())
+                .into(holder.mMoviePoster);
     }
 
     @Override
@@ -62,7 +64,7 @@ public class PopularMoviesAdapter extends RecyclerView.Adapter<PopularMoviesAdap
     }
 
     public class PopularMoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        ImageView mMoviePoster;
+        final ImageView mMoviePoster;
 
         public PopularMoviesViewHolder(View itemView){
             super(itemView);

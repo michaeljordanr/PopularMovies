@@ -1,5 +1,6 @@
 package com.jordan.android.popularmovies.tasks;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -23,9 +24,10 @@ import java.util.List;
 
 public class PopularMoviesTask extends AsyncTask<Filter, Void, List<Movie>> {
 
-    final Context mContext;
-    boolean isNetworkAvailable = true;
-    AsyncTaskCompleteListener mListener;
+    @SuppressLint("StaticFieldLeak")
+    private final Context mContext;
+    private boolean isNetworkAvailable = true;
+    private final AsyncTaskCompleteListener mListener;
 
     private Page resultPage = new Page();
 
@@ -34,33 +36,34 @@ public class PopularMoviesTask extends AsyncTask<Filter, Void, List<Movie>> {
         mListener = listener;
     }
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
 
     @Override
     protected List<Movie> doInBackground(Filter... filter) {
-        List<Movie> result;
+        List<Movie> result = new ArrayList<>();
+        URL moviesRequestUrl;
+        String jsonResponse;
 
         try {
             Filter filterSelected = filter[0];
+            boolean isNetworkAvailable = (filter[0] == filter[1]);
 
             if(filterSelected == Filter.FAVORITES){
                 result = getFavorites();
-            }else {
+            }
 
-                URL moviesRequestUrl = null;
+            if(isNetworkAvailable) {
                 if (filterSelected == Filter.POPULAR) {
                     moviesRequestUrl = NetworkUtils.buildUrlPopular(1);
+                    jsonResponse = NetworkUtils.run(moviesRequestUrl);
+                    resultPage = new Gson().fromJson(jsonResponse, resultPage.getClass());
+                    result = resultPage.getResults();
+
                 } else if (filterSelected == Filter.TOP_RATED) {
                     moviesRequestUrl = NetworkUtils.buildUrlTopRated(1);
+                    jsonResponse = NetworkUtils.run(moviesRequestUrl);
+                    resultPage = new Gson().fromJson(jsonResponse, resultPage.getClass());
+                    result = resultPage.getResults();
                 }
-
-                String jsonResponse = NetworkUtils.run(moviesRequestUrl);
-
-                resultPage = new Gson().fromJson(jsonResponse, resultPage.getClass());
-                result = resultPage.getResults();
             }
 
             return result;

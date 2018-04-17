@@ -1,12 +1,10 @@
 package com.jordan.android.popularmovies.tasks;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
-import android.view.View;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.jordan.android.popularmovies.interfaces.AsyncTaskCompleteListener;
 import com.jordan.android.popularmovies.models.Movie;
@@ -27,23 +25,20 @@ import java.util.List;
  * Created by Michael on 28/02/2018.
  */
 
-public class MovieDetail extends AsyncTask<String, Void, Movie> {
+public class MovieDetailTask extends AsyncTask<String, Void, Movie> {
 
-    final Context mContext;
-    boolean isNetworkAvailable = true;
-    private AsyncTaskCompleteListener mListener;
+    @SuppressLint("StaticFieldLeak")
+    private final Context mContext;
+    private boolean isNetworkAvailable = true;
+    private final AsyncTaskCompleteListener mListener;
 
     private Movie mMovie = new Movie();
 
-    public MovieDetail(Context context, AsyncTaskCompleteListener listener) {
+    public MovieDetailTask(Context context, AsyncTaskCompleteListener listener) {
         mContext = context;
         mListener = listener;
     }
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
 
     @Override
     protected Movie doInBackground(String... movieId) {

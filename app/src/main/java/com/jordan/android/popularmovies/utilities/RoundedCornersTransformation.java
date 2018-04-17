@@ -1,18 +1,18 @@
 package com.jordan.android.popularmovies.utilities;
-/**
- * Copyright (C) 2018 Wasabeef
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+  Copyright (C) 2018 Wasabeef
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
  */
 
 import android.graphics.Bitmap;
@@ -33,10 +33,10 @@ public class RoundedCornersTransformation implements Transformation {
         DIAGONAL_FROM_TOP_LEFT, DIAGONAL_FROM_TOP_RIGHT
     }
 
-    private int mRadius;
-    private int mDiameter;
-    private int mMargin;
-    private CornerType mCornerType;
+    private final int mRadius;
+    private final int mDiameter;
+    private final int mMargin;
+    private final CornerType mCornerType;
 
     public RoundedCornersTransformation(int radius, int margin) {
         this(radius, margin, CornerType.ALL);

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PopularMovies</string>
+    <string name="app_name">Popular Movies</string>
 
     <string name="popular">Most Popular</string>
     <string name="top_rated">Top Rated</string>
@@ -9,7 +9,6 @@
     <string name="plot">Overview</string>
     <string name="trailer">Trailer</string>
     <string name="review">Review</string>
-    <string name="author">Author:</string>
 
     <string name="movie_poster">Movie Poster</string>
     <string name="movie_title">Movie Title</string>
@@ -24,4 +23,5 @@
     <string name="favorive_removed">Movie removed from favorites</string>
 
     <string name="error">Something wrong happened!</string>
+    <string name="dash">"-"</string>
 </resources>

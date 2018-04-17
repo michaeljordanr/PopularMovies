@@ -1,6 +1,5 @@
 package com.jordan.android.popularmovies.activities;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,9 +9,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -30,9 +32,8 @@ import com.jordan.android.popularmovies.adapters.TrailerAdapter;
 import com.jordan.android.popularmovies.data.MovieContract;
 import com.jordan.android.popularmovies.interfaces.AsyncTaskCompleteListener;
 import com.jordan.android.popularmovies.models.Movie;
-import com.jordan.android.popularmovies.tasks.MovieDetail;
+import com.jordan.android.popularmovies.tasks.MovieDetailTask;
 import com.jordan.android.popularmovies.utilities.Constants;
-import com.jordan.android.popularmovies.utilities.Filter;
 import com.jordan.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -53,39 +54,38 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         ReviewAdapter.ReviewAdapterOnClickListener{
 
     @BindView(R.id.tv_movie_detail_title)
-    TextView mTitleTextView;
+    private TextView mTitleTextView;
     @BindView(R.id.iv_movie_poster_detail)
-    ImageView mPosterImageView;
-    @BindView(R.id.imageViewBackground)
-    ImageView mImageViewBackground;
+    private ImageView mPosterImageView;
     @BindView(R.id.tv_ratings)
-    TextView mRatingsTextView;
+    private TextView mRatingsTextView;
     @BindView(R.id.tv_release_date)
-    TextView mReleaseDateTextView;
+    private TextView mReleaseDateTextView;
     @BindView(R.id.tv_movie_plot)
-    TextView mPlotTextView;
+    private TextView mPlotTextView;
     @BindView(R.id.pb_loading_indicator_detail)
-    ProgressBar mLoadingProgress;
+    private ProgressBar mLoadingProgress;
     @BindView(R.id.cl_detail)
-    ConstraintLayout mDetailLayout;
+    private ConstraintLayout mDetailLayout;
     @BindView(R.id.bt_favorite)
-    ToggleButton mFavoriteToggleButton;
+    private ToggleButton mFavoriteToggleButton;
 
     @BindView(R.id.rv_trailer)
-    RecyclerView mTrailerRecyclerView;
+    private RecyclerView mTrailerRecyclerView;
     @BindView(R.id.cl_trailer)
-    ConstraintLayout mTrailerConstraintLayout;
+    private ConstraintLayout mTrailerConstraintLayout;
     @BindView(R.id.rv_review)
-    RecyclerView mReviewRecyclerView;
+    private RecyclerView mReviewRecyclerView;
     @BindView(R.id.cl_review)
-    ConstraintLayout mReviewConstraintLayout;
+    private ConstraintLayout mReviewConstraintLayout;
 
 
     private Toast mToast;
     private Movie mMovie;
     private TrailerAdapter mTrailerAdapter;
     private ReviewAdapter mReviewAdapter;
-    private Filter filterSelected;
+    private CollapsingToolbarLayout collapsingToolbar;
+    private String mTitleForToolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,9 +93,15 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
+        Toolbar mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(getResources().getColor(android.R.color.background_dark));
+        window.setStatusBarColor(getResources().getColor(android.R.color.transparent));
+
+        initCollapsingToolbar();
 
         Intent intentThatShareThisActivity = getIntent();
 
@@ -106,10 +112,7 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
                 mLoadingProgress.setVisibility(View.VISIBLE);
 
                 int idMovie = intentThatShareThisActivity.getIntExtra(Constants.ID_MOVIE, 0);
-                filterSelected = Filter.fromValue(
-                        intentThatShareThisActivity
-                                .getIntExtra(Constants.FILTER_KEY, Filter.POPULAR.getValue()));
-                new MovieDetail(this, this).execute(String.valueOf(idMovie));
+                new MovieDetailTask(this, this).execute(String.valueOf(idMovie));
             }
         }
 
@@ -130,6 +133,39 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         mReviewRecyclerView.setAdapter(mReviewAdapter);
     }
 
+    /**
+     * Initializing collapsing toolbar
+     * Will show and hide the toolbar title on scroll
+     */
+    private void initCollapsingToolbar() {
+        collapsingToolbar = findViewById(R.id.collapsing_toolbar);
+
+        collapsingToolbar.setScrimsShown(false);
+
+        AppBarLayout mAppBarLayout = findViewById(R.id.appbar);
+
+        // hiding & showing the title when toolbar expanded & collapsed
+        mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            boolean isShow = true;
+            int scrollRange = -1;
+
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.getTotalScrollRange();
+                }
+
+                if (scrollRange + verticalOffset == 0) {
+                    collapsingToolbar.setTitle(mTitleForToolbar);
+                    isShow = true;
+                } else if (isShow) {
+                    isShow = false;
+                    collapsingToolbar.setTitle(" ");
+                }
+            }
+        });
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -137,18 +173,11 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
                 // this takes the user 'back', as if they pressed the left-facing triangle icon on the main android toolbar.
                 // if this doesn't work as desired, another possibility is to call `finish()` here.
                 onBackPressed();
-            default:
-                return super.onOptionsItemSelected(item);
+                return true;
         }
+        return false;
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent intentThatComesBack = new Intent();
-        intentThatComesBack.putExtra(Constants.FILTER_KEY, filterSelected.getValue());
-        setResult(Activity.RESULT_OK, intentThatComesBack);
-        finish();
-    }
 
     private void fillMovieDetail(Movie movie){
         final Context context = this;
@@ -162,6 +191,7 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
             e.printStackTrace();
         }
 
+        mTitleForToolbar = movie.getTitle();
         mTitleTextView.setText(movie.getTitle());
         mRatingsTextView.setText(String.valueOf(movie.getRating()));
         mReleaseDateTextView.setText(formatter.format(date));
@@ -173,7 +203,8 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
                 .into(mPosterImageView);
 
         Picasso.with(context).load(NetworkUtils.buildUrlImg(
-                movie.getBackdropPathImg(), Constants.IMG_SIZE_PARAM_BACKGROUND).toString()).into(mImageViewBackground);
+                movie.getBackdropPathImg(), Constants.IMG_SIZE_PARAM_BACKGROUND).toString()).into((ImageView) findViewById(R.id.backdrop));
+
 
         if(isFavorite(movie.getId())){
             mFavoriteToggleButton.setOnCheckedChangeListener(null);
@@ -182,7 +213,12 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         }
 
         mTrailerAdapter.setTrailerData(movie.getVideos());
-        mReviewAdapter.setReviewData(movie.getReviews());
+        if(movie.getReviews().size() > 0) {
+            mReviewConstraintLayout.setVisibility(View.VISIBLE);
+            mReviewAdapter.setReviewData(movie.getReviews());
+        }else{
+            mReviewConstraintLayout.setVisibility(View.GONE);
+        }
     }
 
 
@@ -235,7 +271,7 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         mToast.show();
     }
 
-    public boolean addFavorite(int id, String movieTitle, String img){
+    private boolean addFavorite(int id, String movieTitle, String img){
         ContentValues contentValues = new ContentValues();
 
         contentValues.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, id);
@@ -244,14 +280,10 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
 
         Uri uri = getContentResolver().insert(MovieContract.FavoriteEntry.CONTENT_URI, contentValues);
 
-        if(uri == null){
-            return false;
-        }
-
-        return true;
+        return uri != null;
     }
 
-    public boolean removeFavorite(int id){
+    private boolean removeFavorite(int id){
         ContentResolver contentResolver = getContentResolver();
 
         Uri uriToDelete = MovieContract.FavoriteEntry.CONTENT_URI.buildUpon()
@@ -259,14 +291,10 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
 
         int favoritesDeleted = contentResolver.delete(uriToDelete, null, null);
 
-        if(favoritesDeleted <= 0 ){
-            return false;
-        }
-
-        return true;
+        return favoritesDeleted > 0;
     }
 
-    public boolean isFavorite(int id){
+    private boolean isFavorite(int id){
         try {
             Cursor c = getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
                     null,

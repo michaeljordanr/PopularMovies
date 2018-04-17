@@ -14,8 +14,8 @@ import android.support.annotation.Nullable;
 
 public class MovieContentProvider extends ContentProvider {
 
-    public static final int FAVORITES = 100;
-    public static final int FAVORITES_WITH_ID = 101;
+    private static final int FAVORITES = 100;
+    private static final int FAVORITES_WITH_ID = 101;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -23,7 +23,7 @@ public class MovieContentProvider extends ContentProvider {
 
     private MovieDbHelper mMovieDbHelper;
 
-    public static UriMatcher buildUriMatcher(){
+    private static UriMatcher buildUriMatcher(){
 
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 

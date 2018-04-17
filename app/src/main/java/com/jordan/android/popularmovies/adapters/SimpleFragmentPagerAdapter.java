@@ -13,7 +13,7 @@ import com.jordan.android.popularmovies.utilities.Constants;
 
 public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
 
-    private Context mContext;
+    private final Context mContext;
 
     public SimpleFragmentPagerAdapter(Context context, FragmentManager fm) {
         super(fm);

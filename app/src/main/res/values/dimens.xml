@@ -1,0 +1,6 @@
+<resources>
+    <dimen name="padding">4dp</dimen>
+    <dimen name="margin_separator">8dp</dimen>
+    <dimen name="margin_top_separator">16dp</dimen>
+    <dimen name="margin_review">12dp</dimen>
+</resources>

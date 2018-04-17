@@ -27,6 +27,7 @@
             app:srcCompat="@drawable/play"
             app:layout_constraintRight_toRightOf="@id/iv_videos_thumb"
             app:layout_constraintBottom_toBottomOf="@id/iv_videos_thumb"
+            android:contentDescription="@string/movie_poster"
             />
     </android.support.constraint.ConstraintLayout>
 

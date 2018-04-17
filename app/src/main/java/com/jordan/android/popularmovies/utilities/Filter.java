@@ -5,9 +5,9 @@ package com.jordan.android.popularmovies.utilities;
  */
 
 public enum Filter {
-    POPULAR(1), TOP_RATED(2), FAVORITES(3);
+    POPULAR(1), TOP_RATED(2), FAVORITES(3), NONE(99);
 
-    private int value;
+    private final int value;
 
     Filter(int value) {
         this.value = value;

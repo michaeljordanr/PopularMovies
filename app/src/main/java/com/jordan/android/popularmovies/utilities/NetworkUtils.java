@@ -39,7 +39,7 @@ public final class NetworkUtils {
     private final static String LANGUAGE_PARAM = "language";
     private final static String PAGE_PARAM = "page";
 
-    private static OkHttpClient client = new OkHttpClient();
+    private final static OkHttpClient client = new OkHttpClient();
 
     public static URL buildUrlPopular(int page) {
         Uri builtUri = Uri.parse(POPULAR_MOVIES_URL).buildUpon()
@@ -151,13 +151,7 @@ public final class NetworkUtils {
                 = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
 
-        boolean isAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected();
-
-        if(!isAvailable) {
-            showDialogErrorNetwork(context);
-        }
-
-        return isAvailable;
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public static void showDialogErrorNetwork(Context context){

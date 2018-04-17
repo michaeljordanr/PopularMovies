@@ -15,8 +15,8 @@ import java.util.List;
 public class ReviewAdapter extends  RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>{
     private List<Review> mReviewList;
 
-    private ReviewAdapterOnClickListener mClickListener;
-    private Context mContext;
+    private final ReviewAdapterOnClickListener mClickListener;
+    private final Context mContext;
 
     public interface ReviewAdapterOnClickListener{
         void onClickReview(String url);
@@ -42,7 +42,8 @@ public class ReviewAdapter extends  RecyclerView.Adapter<ReviewAdapter.ReviewVie
     public void onBindViewHolder(ReviewViewHolder holder, int position) {
         Review review = mReviewList.get(position);
 
-        holder.mAuthorTextView.setText(review.getAuthor());
+        String author = mContext.getString(R.string.dash) + review.getAuthor();
+        holder.mAuthorTextView.setText(author);
         holder.mReviewContentTextView.setText(review.getContent());
     }
 
@@ -58,8 +59,8 @@ public class ReviewAdapter extends  RecyclerView.Adapter<ReviewAdapter.ReviewVie
     }
 
     public class ReviewViewHolder extends  RecyclerView.ViewHolder implements View.OnClickListener{
-        TextView mAuthorTextView;
-        TextView mReviewContentTextView;
+        final TextView mAuthorTextView;
+        final TextView mReviewContentTextView;
 
         public ReviewViewHolder(View itemView) {
             super(itemView);
