@@ -54,30 +54,30 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         ReviewAdapter.ReviewAdapterOnClickListener{
 
     @BindView(R.id.tv_movie_detail_title)
-    private TextView mTitleTextView;
+    TextView mTitleTextView;
     @BindView(R.id.iv_movie_poster_detail)
-    private ImageView mPosterImageView;
+    ImageView mPosterImageView;
     @BindView(R.id.tv_ratings)
-    private TextView mRatingsTextView;
+    TextView mRatingsTextView;
     @BindView(R.id.tv_release_date)
-    private TextView mReleaseDateTextView;
+    TextView mReleaseDateTextView;
     @BindView(R.id.tv_movie_plot)
-    private TextView mPlotTextView;
+    TextView mPlotTextView;
     @BindView(R.id.pb_loading_indicator_detail)
-    private ProgressBar mLoadingProgress;
+    ProgressBar mLoadingProgress;
     @BindView(R.id.cl_detail)
-    private ConstraintLayout mDetailLayout;
+    ConstraintLayout mDetailLayout;
     @BindView(R.id.bt_favorite)
-    private ToggleButton mFavoriteToggleButton;
+    ToggleButton mFavoriteToggleButton;
 
     @BindView(R.id.rv_trailer)
-    private RecyclerView mTrailerRecyclerView;
+    RecyclerView mTrailerRecyclerView;
     @BindView(R.id.cl_trailer)
-    private ConstraintLayout mTrailerConstraintLayout;
+    ConstraintLayout mTrailerConstraintLayout;
     @BindView(R.id.rv_review)
-    private RecyclerView mReviewRecyclerView;
+    RecyclerView mReviewRecyclerView;
     @BindView(R.id.cl_review)
-    private ConstraintLayout mReviewConstraintLayout;
+    ConstraintLayout mReviewConstraintLayout;
 
 
     private Toast mToast;

@@ -34,9 +34,9 @@ public class RecyclerViewFragment extends Fragment implements
     private PopularMoviesAdapter mPopularMoviesAdapter;
 
     @BindView(R.id.rv_popular_movies)
-    private RecyclerView mRecyclerView;
+    RecyclerView mRecyclerView;
     @BindView(R.id.pb_loading_indicator)
-    private ProgressBar mLoadingIndicator;
+    ProgressBar mLoadingIndicator;
     private Unbinder unbinder;
 
     private Filter filterSelected;
