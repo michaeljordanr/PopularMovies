@@ -21,6 +21,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,12 +73,12 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
 
     @BindView(R.id.rv_trailer)
     RecyclerView mTrailerRecyclerView;
-    @BindView(R.id.cl_trailer)
-    ConstraintLayout mTrailerConstraintLayout;
+    @BindView(R.id.ll_trailer)
+    LinearLayout mTrailerConstraintLayout;
     @BindView(R.id.rv_review)
     RecyclerView mReviewRecyclerView;
-    @BindView(R.id.cl_review)
-    ConstraintLayout mReviewConstraintLayout;
+    @BindView(R.id.ll_review)
+    LinearLayout mReviewConstraintLayout;
 
 
     private Toast mToast;
