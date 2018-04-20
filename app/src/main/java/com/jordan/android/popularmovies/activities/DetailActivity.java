@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
@@ -100,9 +101,11 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(getResources().getColor(android.R.color.transparent));
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(android.R.color.transparent));
+        }
 
         initCollapsingToolbar();
 
@@ -194,10 +197,15 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
 
         Picasso.with(context)
                 .load(NetworkUtils.buildUrlImg(movie.getImagePath(), Constants.IMG_SIZE_PARAM).toString())
+                .placeholder(R.drawable.icon_movie) // can also be a drawable
+                .error(R.drawable.icon_movie)
                 .into(mPosterImageView);
 
         Picasso.with(context).load(NetworkUtils.buildUrlImg(
-                movie.getBackdropPathImg(), Constants.IMG_SIZE_PARAM_BACKGROUND).toString()).into((ImageView) findViewById(R.id.backdrop));
+                movie.getBackdropPathImg(), Constants.IMG_SIZE_PARAM_BACKGROUND).toString())
+                .placeholder(R.drawable.icon_movie) // can also be a drawable
+                .error(R.drawable.icon_movie)
+                .into((ImageView) findViewById(R.id.backdrop));
 
         mTrailerAdapter.setDataTrailer(movie.getVideos());
         if(movie.getReviews().size() > 0) {

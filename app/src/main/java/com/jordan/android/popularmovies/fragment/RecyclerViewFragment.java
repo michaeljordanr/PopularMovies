@@ -3,10 +3,13 @@ package com.jordan.android.popularmovies.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +24,7 @@ import com.jordan.android.popularmovies.tasks.PopularMoviesTask;
 import com.jordan.android.popularmovies.utilities.Constants;
 import com.jordan.android.popularmovies.utilities.NetworkUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -37,6 +41,7 @@ public class RecyclerViewFragment extends Fragment implements
     private Unbinder unbinder;
 
     private int filterSelected;
+    private  GridLayoutManager mLayoutManager;
 
     public RecyclerViewFragment(){}
 
@@ -45,10 +50,9 @@ public class RecyclerViewFragment extends Fragment implements
         Bundle args = new Bundle();
         args.putSerializable(Constants.FILTER_KEY, filter);
         fragment.setArguments(args);
+
         return fragment;
     }
-
-
 
 
     @Nullable
@@ -57,9 +61,9 @@ public class RecyclerViewFragment extends Fragment implements
         View view = inflater.inflate(R.layout.recycler_view, container, false);
         unbinder = ButterKnife.bind(this, view);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(),2);
+        mLayoutManager = new GridLayoutManager(getActivity(),numberOfColumns());
 
-        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
         mPopularMoviesAdapter = new PopularMoviesAdapter(this);
         mRecyclerView.setAdapter(mPopularMoviesAdapter);
@@ -69,20 +73,9 @@ public class RecyclerViewFragment extends Fragment implements
 
         loadPopularMovies(filterSelected);
 
+        Log.d("passa", "Passa");
 
         return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        Bundle bundle = getArguments();
-        if(bundle != null) {
-            filterSelected = bundle.getInt(Constants.FILTER_KEY);
-
-            loadPopularMovies(filterSelected);
-        }
     }
 
     @Override
@@ -122,9 +115,16 @@ public class RecyclerViewFragment extends Fragment implements
         new PopularMoviesTask(getActivity(), this).execute(filters);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadPopularMovies(filterSelected);
+    private int numberOfColumns() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        // You can change this divider to adjust the size of the poster
+        int widthDivider = 400;
+        int width = displayMetrics.widthPixels;
+        int nColumns = width / widthDivider;
+        if (nColumns < 2) return 2; //to keep the grid aspect
+        return nColumns;
     }
+
+
 }

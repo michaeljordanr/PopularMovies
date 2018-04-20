@@ -19,4 +19,6 @@ public class Constants {
     public static final int DELETE = 13;
     public static final int QUERY = 14;
 
+    public static final String LIST_STATE_KEY = "list_state";
+
 }
