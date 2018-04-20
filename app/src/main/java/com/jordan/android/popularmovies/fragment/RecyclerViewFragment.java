@@ -18,7 +18,6 @@ import com.jordan.android.popularmovies.adapters.PopularMoviesAdapter;
 import com.jordan.android.popularmovies.interfaces.AsyncTaskCompleteListener;
 import com.jordan.android.popularmovies.models.Movie;
 import com.jordan.android.popularmovies.tasks.PopularMoviesTask;
-import com.jordan.android.popularmovies.utilities.Filter;
 import com.jordan.android.popularmovies.utilities.Constants;
 import com.jordan.android.popularmovies.utilities.NetworkUtils;
 
@@ -35,20 +34,16 @@ public class RecyclerViewFragment extends Fragment implements
 
     @BindView(R.id.rv_popular_movies)
     RecyclerView mRecyclerView;
-    @BindView(R.id.pb_loading_indicator)
-    ProgressBar mLoadingIndicator;
     private Unbinder unbinder;
 
-    private Filter filterSelected;
-    private boolean isNetworkAvailable;
+    private int filterSelected;
 
     public RecyclerViewFragment(){}
 
-    public static RecyclerViewFragment newInstance(int filter, boolean isNetworkAvailable) {
+    public static RecyclerViewFragment newInstance(int filter) {
         RecyclerViewFragment fragment = new RecyclerViewFragment();
         Bundle args = new Bundle();
         args.putSerializable(Constants.FILTER_KEY, filter);
-        args.putSerializable(Constants.NETWORK_KEY, isNetworkAvailable);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,8 +65,7 @@ public class RecyclerViewFragment extends Fragment implements
         mRecyclerView.setAdapter(mPopularMoviesAdapter);
 
         Bundle args = getArguments();
-        filterSelected = Filter.fromValue(args.getInt(Constants.FILTER_KEY));
-        isNetworkAvailable = args.getBoolean(Constants.NETWORK_KEY);
+        filterSelected = args.getInt(Constants.FILTER_KEY);
 
         loadPopularMovies(filterSelected);
 
@@ -85,7 +79,7 @@ public class RecyclerViewFragment extends Fragment implements
 
         Bundle bundle = getArguments();
         if(bundle != null) {
-            filterSelected = Filter.fromValue(bundle.getInt(Constants.FILTER_KEY));
+            filterSelected = bundle.getInt(Constants.FILTER_KEY);
 
             loadPopularMovies(filterSelected);
         }
@@ -104,7 +98,7 @@ public class RecyclerViewFragment extends Fragment implements
             Class destinationClass = DetailActivity.class;
             Intent intentToStartDetailActivity = new Intent(context, destinationClass);
             intentToStartDetailActivity.putExtra(Constants.ID_MOVIE, idMovie);
-            intentToStartDetailActivity.putExtra(Constants.FILTER_KEY, filterSelected.getValue());
+            intentToStartDetailActivity.putExtra(Constants.FILTER_KEY, filterSelected);
             startActivity(intentToStartDetailActivity);
         }else{
             NetworkUtils.showDialogErrorNetwork(context);
@@ -114,22 +108,16 @@ public class RecyclerViewFragment extends Fragment implements
     @Override
     public void onTaskComplete(List<Movie> movies, boolean isNetworkAvailable) {
         if(isNetworkAvailable) {
-            mRecyclerView.setVisibility(View.VISIBLE);
             if (movies != null) {
                 mPopularMoviesAdapter.setMovieData(movies);
             }
-        }else{
-            NetworkUtils.showDialogErrorNetwork(getActivity());
         }
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
     }
 
-    private void loadPopularMovies(Filter filter){
-        mLoadingIndicator.setVisibility(View.VISIBLE);
-        mRecyclerView.setVisibility(View.INVISIBLE);
-        Filter[] filters = new Filter[2];
-        filters[0] = filter;
-        filters[1] = (isNetworkAvailable) ? filter : Filter.NONE ;
+    private void loadPopularMovies(int filter){
+        String[] filters = new String[2];
+        filters[0] = String.valueOf(filter);
+        filters[1] = (NetworkUtils.isNetworkAvailable(getContext())) ? String.valueOf(filter) : String.valueOf(Constants.NONE);
 
         new PopularMoviesTask(getActivity(), this).execute(filters);
     }
@@ -137,12 +125,6 @@ public class RecyclerViewFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
-
-        isNetworkAvailable = NetworkUtils.isNetworkAvailable(getContext());
-        if(!isNetworkAvailable){
-            NetworkUtils.showDialogErrorNetwork(getContext());
-        }
-
         loadPopularMovies(filterSelected);
     }
 }

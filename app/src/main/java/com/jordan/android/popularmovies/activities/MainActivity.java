@@ -9,7 +9,7 @@ import android.os.Bundle;
 import com.jordan.android.popularmovies.R;
 import com.jordan.android.popularmovies.adapters.ViewPagerAdapter;
 import com.jordan.android.popularmovies.fragment.RecyclerViewFragment;
-import com.jordan.android.popularmovies.utilities.Filter;
+import com.jordan.android.popularmovies.utilities.Constants;
 import com.jordan.android.popularmovies.utilities.NetworkUtils;
 
 import butterknife.BindView;
@@ -46,15 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-        boolean isNetworkAvailable = NetworkUtils.isNetworkAvailable(this);
-
-        if(!isNetworkAvailable){
-            NetworkUtils.showDialogErrorNetwork(this);
-        }
-
-        adapter.addFragment(RecyclerViewFragment.newInstance(Filter.POPULAR.getValue(), isNetworkAvailable), getString(R.string.popular));
-        adapter.addFragment(RecyclerViewFragment.newInstance(Filter.TOP_RATED.getValue(), isNetworkAvailable), getString(R.string.top_rated));
-        adapter.addFragment(RecyclerViewFragment.newInstance(Filter.FAVORITES.getValue(), isNetworkAvailable), getString(R.string.favorites));
+        adapter.addFragment(RecyclerViewFragment.newInstance(Constants.POPULAR), getString(R.string.popular));
+        adapter.addFragment(RecyclerViewFragment.newInstance(Constants.TOP_RATED), getString(R.string.top_rated));
+        adapter.addFragment(RecyclerViewFragment.newInstance(Constants.FAVORITES), getString(R.string.favorites));
         viewPager.setOffscreenPageLimit(3);
         viewPager.setAdapter(adapter);
     }

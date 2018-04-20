@@ -7,4 +7,5 @@
     <color name="background">#2F2F2F</color>
     <color name="textColor">#FFFFFF</color>
     <color name="black">@android:color/black</color>
+    <color name="background_separator">#666567</color>
 </resources>

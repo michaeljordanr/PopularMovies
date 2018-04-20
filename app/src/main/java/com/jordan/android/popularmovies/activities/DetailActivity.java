@@ -1,6 +1,6 @@
 package com.jordan.android.popularmovies.activities;
 
-import android.content.ContentResolver;
+import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -28,9 +27,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.jordan.android.popularmovies.R;
-import com.jordan.android.popularmovies.adapters.ReviewAdapter;
-import com.jordan.android.popularmovies.adapters.TrailerAdapter;
+import com.jordan.android.popularmovies.adapters.RecyclerViewAdapter;
 import com.jordan.android.popularmovies.data.MovieContract;
+import com.jordan.android.popularmovies.handler.FavoriteAsyncQueryHandler;
 import com.jordan.android.popularmovies.interfaces.AsyncTaskCompleteListener;
 import com.jordan.android.popularmovies.models.Movie;
 import com.jordan.android.popularmovies.tasks.MovieDetailTask;
@@ -51,8 +50,8 @@ import butterknife.ButterKnife;
  */
 
 public class DetailActivity extends AppCompatActivity implements AsyncTaskCompleteListener<Movie>,
-        CompoundButton.OnCheckedChangeListener, TrailerAdapter.TrailerAdapterOnClickListener,
-        ReviewAdapter.ReviewAdapterOnClickListener{
+        CompoundButton.OnCheckedChangeListener, RecyclerViewAdapter.AdapterOnClickListener,
+        FavoriteAsyncQueryHandler.FavoriteQueryHandlerCompleteListener{
 
     @BindView(R.id.tv_movie_detail_title)
     TextView mTitleTextView;
@@ -83,10 +82,13 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
 
     private Toast mToast;
     private Movie mMovie;
-    private TrailerAdapter mTrailerAdapter;
-    private ReviewAdapter mReviewAdapter;
+    private RecyclerViewAdapter mTrailerAdapter;
+    private RecyclerViewAdapter mReviewAdapter;
     private CollapsingToolbarLayout collapsingToolbar;
     private String mTitleForToolbar;
+
+    private String msg;
+    private static AsyncQueryHandler queryHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,6 +107,7 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         initCollapsingToolbar();
 
         Intent intentThatShareThisActivity = getIntent();
+        int idMovie = 0;
 
         if(intentThatShareThisActivity != null) {
             if (intentThatShareThisActivity.hasExtra(Constants.ID_MOVIE)) {
@@ -112,8 +115,8 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
                 mTrailerConstraintLayout.setVisibility(View.INVISIBLE);
                 mLoadingProgress.setVisibility(View.VISIBLE);
 
-                int idMovie = intentThatShareThisActivity.getIntExtra(Constants.ID_MOVIE, 0);
-                new MovieDetailTask(this, this).execute(String.valueOf(idMovie));
+                idMovie = intentThatShareThisActivity.getIntExtra(Constants.ID_MOVIE, 0);
+                new MovieDetailTask( this).execute(String.valueOf(idMovie));
             }
         }
 
@@ -123,15 +126,18 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         LinearLayoutManager layoutManagerTrailer
                 = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mTrailerRecyclerView.setLayoutManager(layoutManagerTrailer);
-        mTrailerAdapter = new TrailerAdapter(this, this);
+        mTrailerAdapter = new RecyclerViewAdapter(this, this);
         mTrailerRecyclerView.setAdapter(mTrailerAdapter);
 
 
         LinearLayoutManager layoutManagerReview
                 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mReviewRecyclerView.setLayoutManager(layoutManagerReview);
-        mReviewAdapter = new ReviewAdapter(this, this);
+        mReviewAdapter= new RecyclerViewAdapter(this, this);
         mReviewRecyclerView.setAdapter(mReviewAdapter);
+
+        queryHandler = new FavoriteAsyncQueryHandler(getContentResolver(), this);
+        checkIfIsFavorite(idMovie);
     }
 
     /**
@@ -167,19 +173,6 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // this takes the user 'back', as if they pressed the left-facing triangle icon on the main android toolbar.
-                // if this doesn't work as desired, another possibility is to call `finish()` here.
-                onBackPressed();
-                return true;
-        }
-        return false;
-    }
-
-
     private void fillMovieDetail(Movie movie){
         final Context context = this;
         SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
@@ -206,17 +199,10 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
         Picasso.with(context).load(NetworkUtils.buildUrlImg(
                 movie.getBackdropPathImg(), Constants.IMG_SIZE_PARAM_BACKGROUND).toString()).into((ImageView) findViewById(R.id.backdrop));
 
-
-        if(isFavorite(movie.getId())){
-            mFavoriteToggleButton.setOnCheckedChangeListener(null);
-            mFavoriteToggleButton.setChecked(true);
-            mFavoriteToggleButton.setOnCheckedChangeListener(this);
-        }
-
-        mTrailerAdapter.setTrailerData(movie.getVideos());
+        mTrailerAdapter.setDataTrailer(movie.getVideos());
         if(movie.getReviews().size() > 0) {
             mReviewConstraintLayout.setVisibility(View.VISIBLE);
-            mReviewAdapter.setReviewData(movie.getReviews());
+            mReviewAdapter.setDataReview(movie.getReviews());
         }else{
             mReviewConstraintLayout.setVisibility(View.GONE);
         }
@@ -244,82 +230,115 @@ public class DetailActivity extends AppCompatActivity implements AsyncTaskComple
             return;
         }
 
-        String msg;
-
-        if(mToast != null){
-            mToast.cancel();
-        }
-
         if(on){
-            if(addFavorite(Integer.parseInt(
-                    compoundButton.getTag().toString()),
-                    mMovie.getTitle(),mMovie.getImagePath())) {
-
-                msg = getString(R.string.favorite_added);
-            }else{
-                msg = getString(R.string.error);
-            }
+            addFavorite(Integer.parseInt(compoundButton.getTag().toString()),
+                    mMovie.getTitle(),mMovie.getImagePath());
         }else{
-            if(removeFavorite(Integer.parseInt(compoundButton.getTag().toString()))){
-                msg = getString(R.string.favorive_removed);
-            }else{
-                msg = getString(R.string.error);
-            }
+           removeFavorite(Integer.parseInt(compoundButton.getTag().toString()));
+           msg = getString(R.string.favorive_removed);
         }
-
-        mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
-
-        mToast.show();
     }
 
-    private boolean addFavorite(int id, String movieTitle, String img){
+    private void addFavorite(int id, String movieTitle, String img){
         ContentValues contentValues = new ContentValues();
 
         contentValues.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, id);
         contentValues.put(MovieContract.FavoriteEntry.COLUMN_TITLE, movieTitle);
         contentValues.put(MovieContract.FavoriteEntry.COLUMN_POSTER, img);
 
-        Uri uri = getContentResolver().insert(MovieContract.FavoriteEntry.CONTENT_URI, contentValues);
-
-        return uri != null;
-    }
-
-    private boolean removeFavorite(int id){
-        ContentResolver contentResolver = getContentResolver();
-
-        Uri uriToDelete = MovieContract.FavoriteEntry.CONTENT_URI.buildUpon()
-                .appendPath(String.valueOf(id)).build();
-
-        int favoritesDeleted = contentResolver.delete(uriToDelete, null, null);
-
-        return favoritesDeleted > 0;
-    }
-
-    private boolean isFavorite(int id){
         try {
-            Cursor c = getContentResolver().query(MovieContract.FavoriteEntry.CONTENT_URI,
+            queryHandler.startInsert(
+                    Constants.INSERT,
+                    null,
+                    MovieContract.FavoriteEntry.CONTENT_URI,
+                    contentValues);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void removeFavorite(int id){
+        try {
+            Uri uriToDelete = MovieContract.FavoriteEntry.CONTENT_URI.buildUpon()
+                    .appendPath(String.valueOf(id)).build();
+
+        queryHandler.startDelete(
+                Constants.DELETE,
+                null,
+                uriToDelete,
+                null,
+                null
+        );
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void checkIfIsFavorite(int id){
+        try {
+            queryHandler.startQuery(
+                    Constants.QUERY,
+                    null,
+                    MovieContract.FavoriteEntry.CONTENT_URI,
                     null,
                     MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + "=?",
                     new String[]{String.valueOf(id)},
-                    null);
-
-            if (c != null && c.getCount() > 0) {
-                c.close();
-                return true;
-            }
+                    null
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+    }
+
+    private void showLongToast(String msg){
+        if(mToast != null){
+            mToast.cancel();
+        }
+
+        mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+        mToast.show();
     }
 
     @Override
-    public void onClickTrailer(String url) {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+    public void isFavorite(Cursor cursor) {
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.close();
+
+            mFavoriteToggleButton.setOnCheckedChangeListener(null);
+            mFavoriteToggleButton.setChecked(true);
+            mFavoriteToggleButton.setOnCheckedChangeListener(this);
+        }
     }
 
     @Override
-    public void onClickReview(String url) {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+    public void onInsertFavoriteComplete(boolean wasSucceeded) {
+        if(wasSucceeded) {
+            msg = this.getString(R.string.favorite_added);
+            mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+            mToast.show();
+        }
+    }
+
+    @Override
+    public void onDeleteFavoriteComplete(boolean wasSucceeded) {
+        if(wasSucceeded) {
+            msg = this.getString(R.string.favorive_removed);
+            showLongToast(msg);
+        }
+    }
+
+    private void openWebPage(String url) {
+        Uri webpage = Uri.parse(url);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onClick(String url) {
+        openWebPage(url);
     }
 }

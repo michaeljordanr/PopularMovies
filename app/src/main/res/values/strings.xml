@@ -24,4 +24,7 @@
 
     <string name="error">Something wrong happened!</string>
     <string name="dash">"-"</string>
+
+    <string name="loading">Loading</string>
+    <string name="msg_loading">Downloading data…</string>
 </resources>

@@ -14,8 +14,12 @@ import android.support.annotation.Nullable;
 
 public class MovieContentProvider extends ContentProvider {
 
-    private static final int FAVORITES = 100;
-    private static final int FAVORITES_WITH_ID = 101;
+    private static final int MOST_POPULAR = 100;
+
+    private static final int TOP_RATED = 200;
+
+    private static final int FAVORITES = 300;
+    private static final int FAVORITES_WITH_ID = 301;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -26,6 +30,10 @@ public class MovieContentProvider extends ContentProvider {
     private static UriMatcher buildUriMatcher(){
 
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
+        uriMatcher.addURI(MovieContract.AUTHORITY, MovieContract.PATH_MOST_POPULAR, MOST_POPULAR);
+
+        uriMatcher.addURI(MovieContract.AUTHORITY, MovieContract.PATH_TOP_RATED, TOP_RATED);
 
         uriMatcher.addURI(MovieContract.AUTHORITY, MovieContract.PATH_FAVORITE, FAVORITES);
         uriMatcher.addURI(MovieContract.AUTHORITY, MovieContract.PATH_FAVORITE + "/#", FAVORITES_WITH_ID);
@@ -51,6 +59,24 @@ public class MovieContentProvider extends ContentProvider {
         Cursor retCursor;
 
         switch (match){
+            case MOST_POPULAR:
+                retCursor = db.query(MovieContract.MostPopularEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            case TOP_RATED:
+                retCursor = db.query(MovieContract.TopRatedEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
             case FAVORITES:
                 retCursor = db.query(MovieContract.FavoriteEntry.TABLE_NAME,
                         projection,
@@ -83,10 +109,11 @@ public class MovieContentProvider extends ContentProvider {
         int match = sUriMatcher.match(uri);
 
         Uri returnUri;
+        long id;
 
         switch (match){
             case FAVORITES:
-                long id = db.insert(
+                id = db.insert(
                         MovieContract.FavoriteEntry.TABLE_NAME, null, contentValues);
 
                 if(id > 0){
@@ -107,28 +134,81 @@ public class MovieContentProvider extends ContentProvider {
     }
 
     @Override
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
+
+        final SQLiteDatabase db = mMovieDbHelper.getWritableDatabase();
+
+        int match = sUriMatcher.match(uri);
+
+        String table = "";
+
+        switch (match) {
+            case MOST_POPULAR:
+                table = MovieContract.MostPopularEntry.TABLE_NAME;
+                break;
+            case TOP_RATED:
+                table = MovieContract.TopRatedEntry.TABLE_NAME;
+                break;
+        }
+
+        if (!table.equals("")) {
+            db.beginTransaction();
+            int rowsInserted = 0;
+            try {
+                for (ContentValues value : values) {
+
+                    long _id = db.insert(table, null, value);
+                    if (_id != -1) {
+                        rowsInserted++;
+                    }
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            if (rowsInserted > 0) {
+                getContext().getContentResolver().notifyChange(uri, null);
+            }
+
+            return rowsInserted;
+        } else {
+            return super.bulkInsert(uri, values);
+        }
+
+    }
+
+    @Override
     public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
         final SQLiteDatabase db = mMovieDbHelper.getWritableDatabase();
 
         int match = sUriMatcher.match(uri);
 
-        int favoritesDeleted;
+        int rowsDeleted;
 
         switch (match){
+            case MOST_POPULAR:
+                rowsDeleted = db.delete(MovieContract.MostPopularEntry.TABLE_NAME,
+                        null, null);
+                break;
+            case TOP_RATED:
+                rowsDeleted = db.delete(MovieContract.TopRatedEntry.TABLE_NAME,
+                        null, null);
+                break;
             case FAVORITES_WITH_ID:
                 String id = uri.getPathSegments().get(1);
-                favoritesDeleted = db.delete(MovieContract.FavoriteEntry.TABLE_NAME,
+                rowsDeleted = db.delete(MovieContract.FavoriteEntry.TABLE_NAME,
                         "movieId=?", new String[]{id});
                 break;
                 default:
                     throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        if(favoritesDeleted > 0){
+        if(rowsDeleted > 0){
             getContext().getContentResolver().notifyChange(uri, null);
         }
 
-        return favoritesDeleted;
+        return rowsDeleted;
     }
 
     @Override

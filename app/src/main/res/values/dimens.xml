@@ -2,5 +2,25 @@
     <dimen name="padding">4dp</dimen>
     <dimen name="margin_separator">8dp</dimen>
     <dimen name="margin_top_separator">16dp</dimen>
+    <dimen name="margin_top_separator_8">8dp</dimen>
+    <dimen name="margin_start_separator_8">8dp</dimen>
+    <dimen name="margin_end_separator">16dp</dimen>
+    <dimen name="margin_end_separator_8">16dp</dimen>
+    <dimen name="margin_end_separator_4">4dp</dimen>
     <dimen name="margin_review">12dp</dimen>
+
+    <dimen name="behavior_overlap">40dp</dimen>
+
+    <dimen name="editor_absoluteX_Guideline">192dp</dimen>
+    <dimen name="editor_absoluteY_Guideline">0dp</dimen>
+
+    <dimen name="tv_movie_detail_title_width">160dp</dimen>
+    <dimen name="tv_movie_detail_title_text_size">16sp</dimen>
+    <dimen name="tv_movie_detail_title_text_size_land">26sp</dimen>
+
+    <dimen name="tv_ratings_margin_start">36dp</dimen>
+
+    <dimen name="tv_release_date_width">86dp</dimen>
+
+    <dimen name="separator_height">1dp</dimen>
 </resources>

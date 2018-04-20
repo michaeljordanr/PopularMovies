@@ -1,20 +1,17 @@
 //package com.jordan.android.popularmovies.utilities;
 //
-///**
-// * Created by Michael on 27/02/2018.
-// */
 //
-//public enum Filter {
-//    POPULAR(1), TOP_RATED(2), FAVORITES(3), NONE(99);
+//public enum QueryToken {
+//    INSERT(1), UPDATE(2), DELETE(3), QUERY(4);
 //
 //    private final int value;
 //
-//    Filter(int value) {
+//    QueryToken(int value) {
 //        this.value = value;
 //    }
 //
-//    public static Filter fromValue(int value) {
-//        for (Filter my: Filter.values()) {
+//    public static QueryToken fromValue(int value) {
+//        for (QueryToken my: QueryToken.values()) {
 //            if (my.value == value) {
 //                return my;
 //            }

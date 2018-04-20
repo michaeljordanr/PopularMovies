@@ -28,14 +28,12 @@ import java.util.List;
 public class MovieDetailTask extends AsyncTask<String, Void, Movie> {
 
     @SuppressLint("StaticFieldLeak")
-    private final Context mContext;
     private boolean isNetworkAvailable = true;
     private final AsyncTaskCompleteListener mListener;
 
     private Movie mMovie = new Movie();
 
-    public MovieDetailTask(Context context, AsyncTaskCompleteListener listener) {
-        mContext = context;
+    public MovieDetailTask(AsyncTaskCompleteListener listener) {
         mListener = listener;
     }
 
