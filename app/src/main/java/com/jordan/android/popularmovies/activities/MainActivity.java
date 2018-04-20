@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.sliding_tabs)
     TabLayout mTabLayout;
 
-    private Bundle viewPagerState;
     ViewPagerAdapter adapter;
 
     @Override

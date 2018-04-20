@@ -60,6 +60,7 @@ public class RecyclerViewFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.recycler_view, container, false);
         unbinder = ButterKnife.bind(this, view);
+        setRetainInstance(true);
 
         mLayoutManager = new GridLayoutManager(getActivity(),numberOfColumns());
 
@@ -73,9 +74,17 @@ public class RecyclerViewFragment extends Fragment implements
 
         loadPopularMovies(filterSelected);
 
-        Log.d("passa", "Passa");
-
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if(filterSelected == Constants.FAVORITES &&
+                getActivity().getIntent().getBooleanExtra(Constants.FAVORITES_UPDATED, false)) {
+            loadPopularMovies(filterSelected);
+        }
     }
 
     @Override
@@ -92,6 +101,7 @@ public class RecyclerViewFragment extends Fragment implements
             Intent intentToStartDetailActivity = new Intent(context, destinationClass);
             intentToStartDetailActivity.putExtra(Constants.ID_MOVIE, idMovie);
             intentToStartDetailActivity.putExtra(Constants.FILTER_KEY, filterSelected);
+            getActivity().getIntent().putExtra(Constants.FAVORITES_UPDATED, true);
             startActivity(intentToStartDetailActivity);
         }else{
             NetworkUtils.showDialogErrorNetwork(context);
